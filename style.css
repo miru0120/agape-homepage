@@ -1,0 +1,18 @@
+/* Noto Sans JP フォントの読み込み */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+body {
+  font-family: "Noto Sans JP", "游ゴシック", "Yu Gothic", "Meiryo", sans-serif;
+}
+
+/* Additional styles for accordion to handle height transitions */
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.accordion-content.open {
+    max-height: 500px; /* Adjust as needed for content length */
+    transition: max-height 0.3s ease-in;
+}
