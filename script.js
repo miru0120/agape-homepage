@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             globalNav.style.opacity = isGlobalNavVisible ? '1' : '0';
             globalNav.style.pointerEvents = isGlobalNavVisible ? 'auto' : 'none';
         }
-        setLastScrollY(currentScrollY);
+        lastScrollY = currentScrollY; // Fix: Update lastScrollY
     };
 
     const setInitialStickyState = () => {
@@ -90,111 +90,92 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateHeroBackground = () => {
         const mobileBackgroundImage = "https://i.ibb.co/jFqW8mg/mobile-agape.png";
         const desktopBackgroundImage = "https://i.ibb.co/27C9V2Xj/agapeff.png";
-        const currentWidth = window.innerWidth;
+        const currentWidth = window.innerWidth; // Get current window width
+
         if (heroBackground) {
-            heroBackground.style.backgroundImage = `url(${currentWidth < 768 ? mobileBackgroundImage : desktopBackgroundImage})`;
+            if (currentWidth < 768) { // Assuming 768px is the breakpoint for mobile
+                heroBackground.style.backgroundImage = `url('${mobileBackgroundImage}')`;
+            } else {
+                heroBackground.style.backgroundImage = `url('${desktopBackgroundImage}')`;
+            }
         }
     };
 
-    // --- Accordion Logic ---
-    document.querySelectorAll('.accordion-button').forEach(button => {
+    // --- Waste Separation Assistant Logic ---
+    getDisposalInfoButton?.addEventListener('click', () => {
+        const query = wasteItemInput?.value.trim();
+        if (!query) {
+            disposalInfoText.textContent = "検索キーワードを入力してください。";
+            disposalInfoResult.classList.remove('hidden');
+            return;
+        }
+
+        // Add loading state
+        getDisposalInfoButton.textContent = "検索中...";
+        getDisposalInfoButton.disabled = true;
+
+        let resultText = "";
+        const lowerCaseQuery = query.toLowerCase();
+
+        // Simple keyword-based search
+        if (lowerCaseQuery.includes("ゴミ屋敷") || lowerCaseQuery.includes("ごみ屋敷") || lowerCaseQuery.includes("ごみやしき")) {
+            resultText = "ゴミ屋敷の片付けは、大量の不用品やゴミの処分が必要となります。当社では、専門スタッフが迅速かつ丁寧に片付けを行い、お客様の負担を軽減します。まずは無料お見積もりをご利用ください。\n\n関連サービス: お片づけ＆不用品回収、お引越し＆粗大ゴミ片付け";
+        } else if (lowerCaseQuery.includes("遺品整理") || lowerCaseQuery.includes("いひんせいり")) {
+            resultText = "遺品整理は、故人の大切な品々を整理するデリケートな作業です。当社では、ご遺族様のお気持ちに寄り添い、丁寧かつ迅速に遺品整理をサポートいたします。買取可能な品は適正価格で買い取り、費用を抑えることも可能です。\n\n関連サービス: 遺品整理、お片づけ＆不用品回収";
+        } else if (lowerCaseQuery.includes("パソコン") || lowerCaseQuery.includes("pc") || lowerCaseQuery.includes("家電") || lowerCaseQuery.includes("電化製品")) {
+            resultText = "古いパソコンや家電製品は、適切なリサイクルが必要です。当社では、OA機器・家電リサイクルサービスを提供しており、法令に基づき適正に処理いたします。データ消去も承っておりますのでご安心ください。\n\n関連サービス: OA機器・家電リサイクル";
+        } else if (lowerCaseQuery.includes("不用品") || lowerCaseQuery.includes("不要品") || lowerCaseQuery.includes("粗大ゴミ") || lowerCaseQuery.includes("粗大ごみ")) {
+            resultText = "一点からの不用品回収や粗大ゴミの処分も承っております。お部屋をスッキリさせたい、引越しで出た大量のゴミを片付けたいなど、お客様の様々なニーズに対応いたします。\n\n関連サービス: お片づけ＆不用品回収、お引越し＆粗大ゴミ片付け";
+        } else if (lowerCaseQuery.includes("店舗") || lowerCaseQuery.includes("事務所") || lowerCaseQuery.includes("オフィス")) {
+            resultText = "店舗や事務所の移転・閉鎖に伴う不用品や廃棄物の一括回収・処分は当社にお任せください。事業系ゴミの適正処理もサポートいたします。\n\n関連サービス: 店舗＆事務所整理、廃棄物管理コンサルティング";
+        } else if (lowerCaseQuery.includes("機密文書") || lowerCaseQuery.includes("機密書類") || lowerCaseQuery.includes("情報漏洩")) {
+            resultText = "機密文書の処理は情報漏洩のリスクを伴います。当社では、安全かつ確実に機密文書を処理・溶解するサービスを提供しており、お客様の機密情報を厳重に保護します。\n\n関連サービス: 機密文書処理";
+        } else if (lowerCaseQuery.includes("リサイクル") || lowerCaseQuery.includes("資源物")) {
+            resultText = "古紙、金属、プラスチックなど、様々な資源物の回収とリサイクルを推進しています。環境負荷低減に貢献し、持続可能な社会の実現を目指します。\n\n関連サービス: 資源物リサイクル";
+        }
+        else {
+            resultText = `「${query}」に関する情報は現在見つかりませんでした。お手数ですが、直接お問い合わせいただくか、別のキーワードでお試しください。\n\nお問い合わせ先: 0120-86-0053`;
+        }
+
+        disposalInfoText.textContent = resultText;
+        disposalInfoResult.classList.remove('hidden');
+
+        // Remove loading state
+        getDisposalInfoButton.textContent = "解決策を調べる";
+        getDisposalInfoButton.disabled = false;
+    });
+
+    // --- Accordion Logic (from original script) ---
+    const accordionButtons = document.querySelectorAll('.accordion-button');
+    accordionButtons.forEach(button => {
         button.addEventListener('click', () => {
             const content = button.nextElementSibling;
             const icon = button.querySelector('.accordion-icon');
 
-            if (content.classList.contains('open')) {
-                content.classList.remove('open');
-                content.classList.add('hidden');
-                icon.classList.remove('rotate-180');
-            } else {
-                // Close all other open accordions
-                document.querySelectorAll('.accordion-content.open').forEach(openContent => {
-                    openContent.classList.remove('open');
-                    openContent.classList.add('hidden');
-                    openContent.previousElementSibling.querySelector('.accordion-icon').classList.remove('rotate-180');
-                });
+            // Toggle the 'open' class on the content
+            content.classList.toggle('hidden');
+            content.classList.toggle('open');
 
-                content.classList.remove('hidden');
-                content.classList.add('open');
-                icon.classList.add('rotate-180');
+            // Rotate the icon
+            if (content.classList.contains('open')) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
             }
         });
     });
 
-    // --- Waste Separation Assistant Logic (Gemini API Integration) ---
-    const getDisposalInfo = async () => {
-        const item = wasteItemInput ? wasteItemInput.value.trim() : '';
-
-        if (!item) {
-            if (disposalInfoText) disposalInfoText.textContent = '何かお困りごとの内容を入力してください。';
-            if (disposalInfoResult) disposalInfoResult.classList.remove('hidden');
-            return;
-        }
-
-        if (getDisposalInfoButton) getDisposalInfoButton.disabled = true;
-        if (getDisposalInfoButton) getDisposalInfoButton.textContent = '検索中...';
-        if (disposalInfoText) disposalInfoText.textContent = '';
-        if (disposalInfoResult) disposalInfoResult.classList.remove('hidden');
-
-
-        try {
-            let chatHistory = [];
-            const prompt = `お客様からの「お困りごと」に対して、適切な解決策や関連サービス、または一般的な廃棄方法を日本の自治体のルールに沿って簡潔に提案してください。AGAPEリサイクルのサービス（不用品回収、粗大ゴミ回収、遺品整理、生前整理、店舗・オフィス整理、産業廃棄物収集運搬、資源物リサイクル、機密文書処理、廃棄物管理コンサルティング、ゴミ屋敷清掃、特殊清掃、消毒・消臭など）で対応可能な場合は、その旨を積極的に案内し、お問い合わせを促してください。
-
-            例1: ゴミ屋敷 -> 回答: ゴミ屋敷の清掃は、専門的な知識と経験が必要です。AGAPEリサイクルでは、ゴミ屋敷の清掃、消毒、消臭まで一貫して対応可能です。まずはお気軽にご相談ください。
-            例2: 遺品整理 -> 回答: 遺品整理は、故人の思い出を大切にしながら、不用品の分別・処分を行うデリケートな作業です。AGAPEリサイクルでは、遺品整理の専門サービスを提供しており、ご遺族の心に寄り添いながら丁寧に対応いたします。まずはお気軽にご相談ください。
-            例3: 古いパソコンの処分 -> 回答: 古いパソコンは、個人情報保護の観点から適切な処理が必要です。自治体によっては回収していない場合もあります。AGAPEリサイクルでは、OA機器・家電リサイクルサービスで対応可能ですので、お気軽にお問い合わせください。
-            例4: ペットボトル -> 回答: ペットボトルはプラスチック製容器包装としてリサイクル可能です。キャップとラベルを外し、中を軽くすすいでから指定の回収場所に出してください。AGAPEリサイクルでも回収可能ですので、大量の場合などはお気軽にお問い合わせください。
-            お困りごと: ${item}`;
-
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-            const payload = { contents: chatHistory };
-            const apiKey = "" // If you want to use models other than gemini-2.5-flash-preview-05-20 or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                const text = result.candidates[0].content.parts[0].text;
-                if (disposalInfoText) disposalInfoText.textContent = text;
-            } else {
-                if (disposalInfoText) disposalInfoText.textContent = '情報を取得できませんでした。別の内容でお試しください。';
-            }
-        } catch (error) {
-            console.error('Error calling Gemini API:', error);
-            if (disposalInfoText) disposalInfoText.textContent = '情報の取得中にエラーが発生しました。時間をおいて再度お試しください。';
-        } finally {
-            if (getDisposalInfoButton) getDisposalInfoButton.disabled = false;
-            if (getDisposalInfoButton) getDisposalInfoButton.textContent = '解決策を調べる';
-        }
-    };
-
-    getDisposalInfoButton?.addEventListener('click', getDisposalInfo);
-    wasteItemInput?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            getDisposalInfo();
-        }
-    });
-
-    // --- Footer Year Update ---
+    // --- Initializations ---
+    // Set current year in footer
     if (currentYearSpan) {
         currentYearSpan.textContent = new Date().getFullYear();
     }
 
-    // --- Initial Setup and Event Listeners ---
-    setInitialStickyState();
+    // Initial background image setup
     updateHeroBackground();
+    window.addEventListener('resize', updateHeroBackground);
+
+    // Initial sticky nav state setup
+    setInitialStickyState();
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', () => {
-        setInitialStickyState();
-        updateHeroBackground();
-    });
 });

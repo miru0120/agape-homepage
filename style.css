@@ -2,7 +2,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
 
 body {
-  font-family: "Noto Sans JP", "游ゴシック", "Yu Gothic", "Meiryo", sans-serif;
+    font-family: "Noto Sans JP", "游ゴシック", "Yu Gothic", "Meiryo", sans-serif;
+}
+
+/* Animations from React component */
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+.animate-fade-in-up.delay-100 {
+    animation-delay: 0.1s;
+}
+.animate-fade-in-up.delay-300 {
+    animation-delay: 0.3s;
 }
 
 /* Additional styles for accordion to handle height transitions */
